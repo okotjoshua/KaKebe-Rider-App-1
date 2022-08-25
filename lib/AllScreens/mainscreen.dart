@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rider_app/Assistants/assistantMethods.dart';
 import '../AllWidgets/Divider.dart';
-
 
 
 class MainScreen extends StatefulWidget
@@ -28,16 +28,22 @@ class _MainScreenState extends State<MainScreen>
 
   void locatePosition() async
   {
+    LocationPermission permission;
+    permission = await Geolocator.checkPermission();
+    permission = await Geolocator.requestPermission();
+    if( permission== LocationPermission.denied){
+      //nothing
+    }
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     currentPosition = position;
-
     LatLng latLatPosition = LatLng(position.latitude, position.longitude);
 
-    CameraPosition cameraPosition = new CameraPosition(target: latLatPosition, zoom: 14);
+    CameraPosition cameraPosition = new CameraPosition(target: latLatPosition, zoom: 18);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
+    String address = await AssistantMethods.searchCoordinateAddress(position);
+    print("This is your address ::" + address);
   }
-
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
@@ -47,6 +53,7 @@ class _MainScreenState extends State<MainScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
+
       appBar: AppBar(
         title: Text("Main Screen"),
       ),
@@ -184,8 +191,8 @@ class _MainScreenState extends State<MainScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 6.0),
-                    Text("Hey Joshua, ", style: TextStyle(fontSize: 12.0),),
-                    Text("Where to, ", style: TextStyle(fontSize: 20.0, fontFamily: "Brand-Bold"),),
+                    Text("Hey Joshua. ", style: TextStyle(fontSize: 12.0),),
+                    Text("Where to ", style: TextStyle(fontSize: 20.0, fontFamily: "Brand-Bold"),),
                     SizedBox(height: 20.0),
                     Container(
                       decoration: BoxDecoration(
